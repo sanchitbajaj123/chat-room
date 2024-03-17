@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 600px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container h1 {
+            margin: 0 0 10px;
+            font-size: 24px;
+            color: #333;
+        }
+
+        .messages {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .messages li {
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+
+        .form-container {
+            margin-top: 20px;
+            display: flex;
+        }
+
+        #inp {
+            flex: 1;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            outline: none;
+        }
+
+        #btnSend {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #btnSend:hover {
+            background-color: #0056b3;
+        }
+
+        .user {
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        /* Add more styling as needed */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chat-container">
+            <h1>Users:</h1>
+            <ol id="head"></ol>
+        </div>
+
+        <div class="chat-container">
+            <h1>Messages:</h1>
+            <ul id="one" class="messages"></ul>
+        </div>
+
+        <form id="form" class="form-container">
+            <input type="text" id="inp">
+            <button id="btnSend">Send</button>
+        </form>
+    </div>
+
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        let name = prompt("Enter your name");
+        const socket = io();
+        const form = document.getElementById('form');
+        const inp = document.getElementById('inp');
+        const list = document.getElementById('one');
+        const list2 = document.getElementById('head');
+
+        addEventListener('load', e => {
+            e.preventDefault();
+            if (name) {
+                socket.emit('name msg', name);
+            }
+        });
+
+        socket.on('name chat', (msg) => {
+            const item = document.createElement('li');
+            item.textContent = msg;
+            list2.appendChild(item);
+            const item2 = document.createElement('li');
+            item2.textContent = msg+" joined the room";
+            item2.style.color = "green"; 
+            list.appendChild(item2);
+        });
+
+        form.addEventListener('submit', e => {
+            e.preventDefault();
+            if (inp.value) {
+                socket.emit('chat message', name, inp.value);
+                inp.value = ''; // Clear the input field after sending
+            }
+        });
+
+        socket.on('chat', (name, msg) => {
+            const item = document.createElement('li');
+            item.innerHTML = '<span class="user">' + name + ':</span> ' + msg;
+            list.appendChild(item);
+            
+            // Check if the message count exceeds 10
+            if (list.children.length > 10) {
+                list.removeChild(list.firstChild); // Remove the oldest message
+            }
+        });
+
+        socket.on('user disconnected', (name) => {
+            const item = document.createElement('li');
+            item.textContent = name + " is disconnected";
+            item.style.color = "red"; 
+            list.appendChild(item);
+            
+            // Check if the message count exceeds 10
+            if (list.children.length > 10) {
+                list.removeChild(list.firstChild); // Remove the oldest message
+            }
+        });
+    </script>
+</body>
+</html>
