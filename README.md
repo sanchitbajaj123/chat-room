@@ -1,4 +1,4 @@
-it works on localhost:3000 
+url:https://chat-room-bui8.onrender.com/
 Screenshots:
 
 ![alt text](https://github.com/sanchitbajaj123/chat-room/assets/110713000/59a9cb3f-ef92-47e0-afaf-61bad9b2ad28)
